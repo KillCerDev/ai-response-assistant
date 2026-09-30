@@ -1,0 +1,5 @@
+import type { AssistantResponse, AppMode, AnswerLength, ResponseStyle, OutputLanguage } from '../../shared/types'
+export async function apiJson<T>(url: string, options?: RequestInit): Promise<T> { const response = await fetch(url, options); const data = await response.json().catch(() => ({})); if (!response.ok) throw new Error(data.error || `HTTP ${response.status}`); return data as T }
+export const analyzeText = (question: string, settings: { mode: AppMode; answerLength: AnswerLength; responseStyle: ResponseStyle; outputLanguage: OutputLanguage }) => apiJson<AssistantResponse>('/api/analyze', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ question, ...settings }) })
+export const analyzeAudio = (audio: Blob, filename: string) => { const form = new FormData(); form.append('audio', audio, filename); return apiJson<{ text: string }>('/api/transcribe', { method: 'POST', body: form }) }
+export const getApiStatus = () => apiJson<{ ok: boolean; configured: boolean }>('/api/health')
